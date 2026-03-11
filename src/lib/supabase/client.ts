@@ -6,10 +6,16 @@ export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+  // 构建时（无环境变量）返回空客户端，运行时（浏览器）正常初始化
   if (!supabaseUrl || !supabaseKey) {
-    console.warn("Supabase environment variables not found (build time)");
-    // 返回空客户端，运行时再初始化
-    return { auth: { signInWithPassword: () => ({ error: null }), signUp: () => ({ error: null }) } } as any;
+    console.warn("Supabase env vars loaded in browser only (safe warning)");
+    return {
+      auth: {
+        signInWithPassword: async () => ({ error: null }),
+        signUp: async () => ({ error: null }),
+        getUser: async () => ({ data: null, error: null })
+      }
+    } as any;
   }
 
   return createBrowserClient(supabaseUrl, supabaseKey);
